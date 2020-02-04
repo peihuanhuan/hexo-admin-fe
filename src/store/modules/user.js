@@ -47,34 +47,54 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
-        const { data } = response
+      console.log('-------------------- 开始 getinfo')
+      const dataStr = '{"roles":["admin"],"introduction":"I am a super administrator","avatar":"https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif","name":"Super Admin"}'
+      // const dataStr = 'aaa'
+      console.log('--------------------- data字符串是: ' + dataStr)
+      const data = JSON.parse(dataStr)
+      console.log('---------------------解析的data对象是: ' + data)
+      const { roles, name, avatar, introduction } = data
 
-        if (!data) {
-          reject('Verification failed, please Login again.')
-        }
+      // roles must be a non-empty array
+      if (!roles || roles.length <= 0) {
+        reject('getInfo: roles must be a non-null array!')
+      }
+      console.log('---------------- 下面给 storage 赋值')
+      commit('SET_ROLES', roles)
+      commit('SET_NAME', name)
+      commit('SET_AVATAR', avatar)
+      commit('SET_INTRODUCTION', introduction)
+      resolve(data)
 
-        const { roles, name, avatar, introduction } = data
-
-        // roles must be a non-empty array
-        if (!roles || roles.length <= 0) {
-          reject('getInfo: roles must be a non-null array!')
-        }
-
-        commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
-        commit('SET_INTRODUCTION', introduction)
-        resolve(data)
-      }).catch(error => {
-        reject(error)
-      })
+      // getInfo(state.token).then(response => {
+      //   const { data } = response
+      //
+      //   if (!data) {
+      //     reject('Verification failed, please Login again.')
+      //   }
+      //
+      //   const { roles, name, avatar, introduction } = data
+      //
+      //   // roles must be a non-empty array
+      //   if (!roles || roles.length <= 0) {
+      //     reject('getInfo: roles must be a non-null array!')
+      //   }
+      //
+      //   commit('SET_ROLES', roles)
+      //   commit('SET_NAME', name)
+      //   commit('SET_AVATAR', avatar)
+      //   commit('SET_INTRODUCTION', introduction)
+      //   resolve(data)
+      // }).catch(error => {
+      //   reject(error)
+      // })
     })
   },
 
   // user logout
   logout({ commit, state, dispatch }) {
     return new Promise((resolve, reject) => {
+      console.log('-------------- logout')
       logout(state.token).then(() => {
         commit('SET_TOKEN', '')
         commit('SET_ROLES', [])
@@ -110,8 +130,8 @@ const actions = {
       commit('SET_TOKEN', token)
       setToken(token)
 
-      const { roles } = await dispatch('getInfo')
-
+      // const { roles } = await dispatch('getInfo')
+      const roles = ['admin']
       resetRouter()
 
       // generate accessible routes map based on roles

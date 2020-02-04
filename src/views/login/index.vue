@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h3 class="title"> {{ title }}</h3>
       </div>
 
       <el-form-item prop="username">
@@ -96,9 +96,10 @@ export default {
       }
     }
     return {
+      title: process.env.VUE_APP_TITLE,
       loginForm: {
         username: 'admin',
-        password: '111111'
+        password: '123456'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],

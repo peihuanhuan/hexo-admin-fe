@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function fetchList(query) {
   return request({
-    url: '/vue-element-admin/article/list',
+    url: '/article',
     method: 'get',
     params: query
   })
@@ -10,31 +10,50 @@ export function fetchList(query) {
 
 export function fetchArticle(id) {
   return request({
-    url: '/vue-element-admin/article/detail',
-    method: 'get',
-    params: { id }
+    url: '/article/' + id,
+    method: 'get'
   })
 }
 
-export function fetchPv(pv) {
+export function deleteArticle(id) {
   return request({
-    url: '/vue-element-admin/article/pv',
-    method: 'get',
-    params: { pv }
+    url: '/article/' + id,
+    method: 'delete'
   })
 }
 
-export function createArticle(data) {
+export function fetchInfo() {
   return request({
-    url: '/vue-element-admin/article/create',
-    method: 'post',
-    data
+    url: '/info',
+    method: 'get'
   })
 }
 
 export function updateArticle(data) {
   return request({
-    url: '/vue-element-admin/article/update',
+    url: '/article',
+    method: 'put',
+    data
+  })
+}
+
+export function updateArticlePublish(id) {
+  return request({
+    url: '/article/publish/' + id,
+    method: 'put'
+  })
+}
+
+export function updateArticleUnPublish(id) {
+  return request({
+    url: '/article/unpublish/' + id,
+    method: 'put'
+  })
+}
+
+export function createArticle(data) {
+  return request({
+    url: '/article',
     method: 'post',
     data
   })

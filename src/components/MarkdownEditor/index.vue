@@ -38,7 +38,7 @@ export default {
     height: {
       type: String,
       required: false,
-      default: '300px'
+      default: '1000px'
     },
     language: {
       type: String,
