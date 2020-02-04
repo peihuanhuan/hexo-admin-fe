@@ -6,7 +6,7 @@
           发布文章
         </el-button>
         <el-button :loading="draftLoading" type="warning" @click="draftForm(false)">
-          保存草稿 <i class="el-icon-coffee-cup"/>
+          保存草稿 <i class="el-icon-coffee-cup" />
         </el-button>
         <el-button v-if="postForm.id !== undefined" :loading="loading" type="info" @click="unpublish">
           取消发布
@@ -33,8 +33,9 @@
                       multiple
                       filterable
                       allow-create
-                      default-first-option>
-                      <el-option v-for="item in categoryOptions" :key="item" :value="item" :label="item"/>
+                      default-first-option
+                    >
+                      <el-option v-for="item in categoryOptions" :key="item" :value="item" :label="item" />
                     </el-select>
                   </el-form-item>
                 </el-col>
@@ -48,8 +49,9 @@
                       multiple
                       filterable
                       allow-create
-                      default-first-option>
-                      <el-option v-for="item in tagOptions" :key="item" :value="item" :label="item"/>
+                      default-first-option
+                    >
+                      <el-option v-for="item in tagOptions" :key="item" :value="item" :label="item" />
                     </el-select>
 
                   </el-form-item>

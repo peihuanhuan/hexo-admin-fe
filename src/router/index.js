@@ -109,7 +109,7 @@ export const constantRoutes = [
         meta: { title: '新建文章', icon: 'education' }
       }
     ]
-  },
+  }
 
   // {
   //   path: '/documentation',

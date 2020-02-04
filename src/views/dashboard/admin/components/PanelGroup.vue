@@ -77,7 +77,6 @@ export default {
       this.category = response.data.category.length
       this.published = response.data.published
       this.unPublished = response.data.unPublished
-
     }).catch(err => {
       console.log(err)
     })
