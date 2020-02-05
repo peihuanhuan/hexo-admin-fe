@@ -166,7 +166,7 @@ export default {
   methods: {
     autoSaveArticle() {
       timer.siv.push(
-        setInterval(this.draftForm, 30000)
+        setInterval(this.draftForm, 45000, true)
       )
     },
     upload_file_with_callback(blob, callback) {
@@ -213,7 +213,6 @@ export default {
       document.title = `${title} - ${this.postForm.id}`
     },
     submitForm() {
-      console.log(this.postForm)
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true
@@ -231,7 +230,7 @@ export default {
           } else {
             updateArticle(this.postForm).then(response => {
               this.$notify({ title: '更新文章成功', type: 'success', duration: 2000 })
-              this.postForm.content = response.data
+              this.postForm.content = response.data.content
               this.loading = false
             }).catch(err => {
               console.log(err)
@@ -246,20 +245,23 @@ export default {
       })
     },
     draftForm(auto) {
-      if (this.postForm.content.length === 0 || this.postForm.title.length === 0) {
-        this.$message({
-          message: '请填写必要的标题和内容',
-          type: 'warning'
-        })
+      if (this.postForm.content.length === 0) {
+        if (auto === false) {
+          this.$message({ message: '请填写内容', type: 'warning' })
+        }
         return
       }
-      this.draftLoading = true
       var form = Object.assign({}, this.postForm, {})
       form.publish = undefined
+      if (this.postForm.title.length === 0) {
+        form.title = '未命名'
+      }
+      this.draftLoading = true
       updateArticle(form).then(response => {
         if (auto === false) {
           this.$notify({ title: '保存草稿成功', type: 'success', duration: 1000 })
         }
+        this.postForm.id = response.data.id
         this.draftLoading = false
       }).catch(err => {
         console.log(err)
