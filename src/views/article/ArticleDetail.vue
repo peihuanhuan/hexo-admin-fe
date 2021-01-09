@@ -127,7 +127,7 @@ import {
   updateArticleUnPublish
 } from '@/api/article'
 import { upload, policy } from '@/api/file'
-
+import uuid from 'uuid'
 import MarkdownEditor from '@/components/MarkdownEditor'
 
 var timer = {
@@ -231,7 +231,7 @@ export default {
         //   accessKeyId: response.data.accessKeyId,
         //   accessKeySecret: response.data.accessKeySecret,
         // });
-
+        let ossStaticHost=response.data.ossStaticHost;
         try {
           // object-key可以自定义为文件名（例如file.txt）或目录（例如abc/test/file.txt）的形式，实现将文件上传至当前Bucket或Bucket下的指定目录。
           // let token = await sts.assumeRole(
@@ -247,12 +247,20 @@ export default {
             bucket: response.data.bucket,
             region: response.data.region
           })
+          // 文章 名称
           var title = this.postForm.title
-          client.put(title, blob).then((result) => {
-            console.log(result)
-
+          // 上传  文件名
+          var filename=uuid()+"."+blob.type.split('/').pop()
+          // 上传相对于整个bucket（图床）路径名
+          var ext=title+"/"+filename
+          // 文章中显示的地址 
+          var filePath=ossStaticHost+"/"+encodeURIComponent(title)+"/"+filename
+          client.put(ext, blob).then((result) => {
+            // console.log(result)
+            // console.log(uuid())
+            // console.log(blob)
             debugger
-            callback(result.url, '')
+            callback(filePath, '')
           })
           // console.log(result);
           // callback(response.data, '')
