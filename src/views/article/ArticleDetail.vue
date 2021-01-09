@@ -322,7 +322,8 @@ export default {
                   type: 'success',
                   duration: 2000
                 })
-                this.postForm.id = response.data
+                this.postForm.id = response.data.id
+                console.log(this.postForm.id )
                 this.loading = false
               })
               .catch((err) => {
@@ -338,7 +339,7 @@ export default {
                   type: 'success',
                   duration: 2000
                 })
-                this.postForm.content = response.data
+                this.postForm.content = response.data.content
                 this.loading = false
               })
               .catch((err) => {
@@ -376,6 +377,8 @@ export default {
               duration: 1000
             })
           }
+          this.postForm.id = response.data.id
+
           this.draftLoading = false
         })
         .catch((err) => {
