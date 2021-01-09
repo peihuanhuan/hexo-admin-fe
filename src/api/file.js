@@ -8,3 +8,10 @@ export function upload(formData) {
     data: formData
   })
 }
+
+export function policy(formData) {
+  return request({
+    url: '/upload/policy',
+    method: 'get'
+  })
+}
