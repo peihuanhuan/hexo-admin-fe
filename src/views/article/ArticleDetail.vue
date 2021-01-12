@@ -254,7 +254,7 @@ export default {
           // 上传相对于整个bucket（图床）路径名
           var ext=title+"/"+filename
           // 文章中显示的地址 
-          var filePath=ossStaticHost+"/"+encodeURIComponent(title)+"/"+filename
+          var filePath=ossStaticHost+title+"/"+filename
           client.put(ext, blob).then((result) => {
             // console.log(result)
             // console.log(uuid())
@@ -330,7 +330,7 @@ export default {
                   type: 'success',
                   duration: 2000
                 })
-                this.postForm.id = response.data.id
+                this.postForm.id = response.data
                 console.log(this.postForm.id )
                 this.loading = false
               })
