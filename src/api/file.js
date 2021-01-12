@@ -9,9 +9,10 @@ export function upload(formData) {
   })
 }
 
-export function policy(formData) {
+export function policy(title) {
   return request({
     url: '/upload/policy',
-    method: 'get'
+    method: 'get',
+    params: { title }
   })
 }

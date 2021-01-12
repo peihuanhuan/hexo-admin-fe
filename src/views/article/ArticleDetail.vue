@@ -222,7 +222,7 @@ export default {
       timer.siv.push(setInterval(this.draftForm, 30000))
     },
     upload_file_with_callback(blob, callback) {
-      policy().then((response) => {
+      policy(this.postForm.title).then((response) => {
         console.log(response)
         const OSS = require('ali-oss')
         // let STS = OSS.STS;
