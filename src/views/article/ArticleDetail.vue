@@ -231,7 +231,7 @@ export default {
         //   accessKeyId: response.data.accessKeyId,
         //   accessKeySecret: response.data.accessKeySecret,
         // });
-        let ossStaticHost=response.data.ossStaticHost;
+        const ossStaticHost = response.data.ossStaticHost
         try {
           // object-key可以自定义为文件名（例如file.txt）或目录（例如abc/test/file.txt）的形式，实现将文件上传至当前Bucket或Bucket下的指定目录。
           // let token = await sts.assumeRole(
@@ -250,11 +250,11 @@ export default {
           // 文章 名称 去除空格
           var title = this.postForm.title.replaceAll(' ', '')
           // 上传  文件名
-          var filename = uuid().replace(/-/g, '') + "."+blob.type.split('/').pop()
+          var filename = uuid().replace(/-/g, '') + '.' + blob.type.split('/').pop()
           // 上传相对于整个bucket（图床）路径名
-          var ext=title+"/"+filename
+          var ext = title + '/' + filename
           // 文章中显示的地址
-          var filePath=ossStaticHost+title+"/"+filename
+          var filePath = ossStaticHost + title + '/' + filename
           client.put(ext, blob).then((result) => {
             // console.log(result)
             // console.log(uuid())
@@ -331,7 +331,7 @@ export default {
                   duration: 2000
                 })
                 this.postForm.id = response.data
-                console.log(this.postForm.id )
+                console.log(this.postForm.id)
                 this.loading = false
               })
               .catch((err) => {
