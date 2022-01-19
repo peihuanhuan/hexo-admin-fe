@@ -87,13 +87,14 @@ export const constantRoutes = [
         name: '文章',
         meta: { title: '编辑文章', icon: 'dashboard' },
         hidden: true
+      },
+      {
+        path: 'article2/:id(\\d+)',
+        component: () => import('@/views/article2/edit'),
+        name: '文章(2)',
+        meta: { title: '编辑文章(2)', icon: 'dashboard' },
+        hidden: true
       }
-      // {
-      //   path: 'article',
-      //   component: () => import('@/views/article/create'),
-      //   name: '文章',
-      //   meta: { title: '新建文章', icon: 'dashboard' }
-      // }
     ]
   },
 
@@ -107,6 +108,20 @@ export const constantRoutes = [
         component: () => import('@/views/article/create'),
         name: '文章',
         meta: { title: '新建文章', icon: 'education' }
+      }
+    ]
+  },
+
+  {
+    path: '/article2',
+    component: Layout,
+    redirect: '/article2/creat',
+    children: [
+      {
+        path: 'creat',
+        component: () => import('@/views/article2/create'),
+        name: '新版界面',
+        meta: { title: 'vditor', icon: 'edit' }
       }
     ]
   }

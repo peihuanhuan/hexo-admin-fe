@@ -12,7 +12,7 @@ const users = {
   'admin-token': {
     roles: ['admin'],
     introduction: 'I am a super administrator',
-    avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
+    avatar: 'https://blogbed.oss-cn-shanghai.aliyuncs.com/static/avatar/dogplane.jpg',
     name: 'Super Admin'
   },
   'editor-token': {

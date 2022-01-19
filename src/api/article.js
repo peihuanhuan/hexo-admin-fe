@@ -1,4 +1,6 @@
 import request from '@/utils/request'
+import store from '@/store'
+import { getToken } from '@/utils/auth'
 
 export function fetchList(query) {
   return request({
@@ -13,6 +15,20 @@ export function fetchArticle(id) {
     url: '/article/' + id,
     method: 'get'
   })
+}
+
+// 初次加载必须同步执行！
+export function fetchArticleAsync(id) {
+  var xhr = new XMLHttpRequest()
+  xhr.open('get', process.env.VUE_APP_BASE_API + '/article/' + id, false) // 同步请求
+  if (store.getters.token) {
+    // let each request carry token
+    // ['X-Token'] is a custom headers key
+    // please modify it according to the actual situation
+    xhr.setRequestHeader('X-Token', getToken())
+  }
+  xhr.send()
+  return xhr
 }
 
 export function deleteArticle(id) {

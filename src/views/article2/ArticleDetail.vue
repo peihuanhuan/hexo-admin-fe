@@ -108,27 +108,27 @@
         </el-row>
 
         <div class="editor-container">
-          <markdown-editor v-model="postForm.content" :options="mdOptions" />
+          <div id="vditor" />
         </div>
       </div>
     </el-form>
   </div>
 </template>
-
 <script>
-// import Upload from '@/components/Upload/SingleImage3'
 import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
 import {
-  fetchArticle,
+  fetchArticleAsync,
   fetchInfo,
   updateArticle,
   createArticle,
   updateArticleUnPublish
 } from '@/api/article'
-import { policy } from '@/api/file'
-import uuid from 'uuid'
-import MarkdownEditor from '@/components/MarkdownEditor'
+
+import Vditor from 'vditor'
+import 'vditor/src/assets/scss/index.scss'
+
+import { getToken } from '@/utils/auth'
 
 var timer = {
   sto: [],
@@ -143,10 +143,49 @@ const defaultForm = {
   id: undefined,
   publish: ''
 }
-
+let toolbar
+if (window.innerWidth < 768) {
+  toolbar = [
+    'emoji',
+    'headings',
+    'bold',
+    'italic',
+    'strike',
+    'link',
+    '|',
+    'list',
+    'ordered-list',
+    'check',
+    'outdent',
+    'indent',
+    '|',
+    'quote',
+    'line',
+    'code',
+    'inline-code',
+    'insert-before',
+    'insert-after',
+    '|',
+    'upload',
+    'record',
+    'table',
+    '|',
+    'undo',
+    'redo',
+    '|',
+    'edit-mode',
+    'content-theme',
+    'code-theme',
+    'export',
+    {
+      name: 'more',
+      toolbar: ['fullscreen', 'both', 'preview', 'info', 'help']
+    }
+  ]
+}
 export default {
   name: 'ArticleDetail',
-  components: { MarkdownEditor, MDinput, Sticky },
+  components: { MDinput, Sticky },
   props: {
     isEdit: {
       type: Boolean,
@@ -166,6 +205,8 @@ export default {
       }
     }
     return {
+      editPrepared: 1, // 为2是可以执行赋值 为3时方可执行定时任务（1-> 获取文章内容->2->赋值到编辑器->3）
+      contentEditor: Vditor,
       postForm: Object.assign({}, defaultForm),
       loading: false,
       draftLoading: false,
@@ -175,21 +216,14 @@ export default {
         title: [{ validator: validateRequire }],
         content: [{ validator: validateRequire }]
       },
-      tempRoute: {},
-      mdOptions: {
-        toolbarItems: ['heading', 'bold', 'italic'],
-        hooks: {
-          // https://github.com/nhnent/tui.editor/issues/57
-          addImageBlobHook: this.upload_file_with_callback
-        }
-      }
+      tempRoute: {}
     }
   },
   computed: {
     displayTime: {
       // set and get is useful when the data
       // returned by the back end api is different from the front end
-      // back end return => "2013-06-25 06:59:25"
+      // back end return => '2013-06-25 06:59:25'
       // front end need timestamp => 1372114765000
       get() {
         return +new Date(this.postForm.display_time)
@@ -199,7 +233,119 @@ export default {
       }
     }
   },
+  mounted() {
+    window.vue = this
+    this.contentEditor = new Vditor('vditor', {
+      // cdn: 'http://localhost:9000',
+      toolbar,
+      lang: 'zh_CN',
+      mode: 'wysiwyg',
+      height: window.innerHeight + 100,
+      outline: {
+        enable: true,
+        position: 'right'
+      },
+      debugger: true,
+      typewriterMode: true,
+      placeholder: 'Hello, Vditor!',
+      preview: {
+        markdown: {
+          toc: true,
+          mark: true,
+          footnotes: true,
+          autoSpace: true
+        },
+        math: {
+          engine: 'KaTeX'
+        }
+      },
+      toolbarConfig: {
+        pin: true
+      },
+      counter: {
+        enable: true,
+        type: 'text'
+      },
+      hint: {
+        emojiPath:
+          'https://cdn.jsdelivr.net/npm/vditor@1.8.3/dist/images/emoji',
+        emojiTail:
+          '<a href="https://ld246.com/settings/function" target="_blank">设置常用表情</a>',
+        emoji: {
+          sd: '💔',
+          j: 'https://unpkg.com/vditor@1.3.1/dist/images/emoji/j.png'
+        },
+        parse: false,
+        extend: [
+          {
+            key: '@',
+            hint: (key) => {
+              console.log(key)
+              if ('vanessa'.indexOf(key.toLocaleLowerCase()) > -1) {
+                return [
+                  {
+                    value: '@Vanessa',
+                    html: '<img src="https://avatars0.githubusercontent.com/u/970828?s=60&v=4"/> Vanessa'
+                  }
+                ]
+              }
+              return []
+            }
+          },
+          {
+            key: '#',
+            hint: (key) => {
+              console.log(key)
+              if ('vditor'.indexOf(key.toLocaleLowerCase()) > -1) {
+                return [
+                  {
+                    value: '#Vditor',
+                    html: '<span style="color: #999;">#Vditor</span> ♏ 一款浏览器端的 Markdown 编辑器，支持所见即所得（富文本）、即时渲染（类似 Typora）和分屏预览模式。'
+                  }
+                ]
+              }
+              return []
+            }
+          }
+        ]
+      },
+      tab: '\t',
+
+      upload: {
+        accept: 'image/*,.mp3, .wav, .rar',
+        edit: '.svg, .png',
+        editUrl:
+          'http://110.42.188.82:8089?embed=1&ui=atlas&spin=1&proto=json&configure=1&lang=zh',
+        token: getToken(),
+        url: '/api/upload/editor',
+        linkToImgUrl: '/api/upload/fetch',
+        urlToGetOssCredentials: process.env.VUE_APP_BASE_API + '/upload/policy',
+        filename(name) {
+          return name
+            .replace(/[^(a-zA-Z0-9\u4e00-\u9fa5\.)]/g, '')
+            .replace(/[\?\\/:|<>\*\[\]\(\)\$%\{\}@~]/g, '')
+            .replace('/\\s/g', '')
+        }
+      },
+      after: () => {
+        if (this.isEdit) {
+          this.contentEditor.disabled()
+          // while (this.editPrepared != 2) {
+          //   debugger
+          // }
+          this.editPrepared += 1
+          this.contentEditor.setValue(this.postForm.content)
+          this.contentEditor.enable()
+        } else {
+          this.contentEditor.setValue('# hello world! ')
+        }
+        // this.contentEditor.setTheme('dark', 'dark',  'native');
+        // document.querySelector('body').style.backgroundColor='#2f363d';
+      }
+    })
+  },
   created() {
+    debugger
     if (this.isEdit) {
       const id = this.$route.params && this.$route.params.id
       this.fetchData(id)
@@ -221,79 +367,13 @@ export default {
     autoSaveArticle() {
       timer.siv.push(setInterval(this.draftForm, 30000))
     },
-    upload_file_with_callback(blob, callback) {
-      policy(this.postForm.title).then((response) => {
-        console.log(response)
-        const OSS = require('ali-oss')
-        // let STS = OSS.STS;
-        // let sts = new STS({
-        //   // 阿里云主账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM账号进行API访问或日常运维，请登录RAM控制台创建RAM账号。
-        //   accessKeyId: response.data.accessKeyId,
-        //   accessKeySecret: response.data.accessKeySecret,
-        // });
-        const ossStaticHost = response.data.ossStaticHost
-        try {
-          // object-key可以自定义为文件名（例如file.txt）或目录（例如abc/test/file.txt）的形式，实现将文件上传至当前Bucket或Bucket下的指定目录。
-          // let token = await sts.assumeRole(
-          //   "<role-arn>",
-          //   "<policy>",
-          //   "<expiration>",
-          //   "<session-name>"
-          // );
-          var client = OSS({
-            accessKeyId: response.data.accessKeyId,
-            accessKeySecret: response.data.accessKeySecret,
-            stsToken: response.data.securityToken,
-            bucket: response.data.bucket,
-            region: response.data.region
-          })
-          // 文章 名称
-          var title = this.postForm.title
-          // 上传  文件名
-          var filename = uuid() + '.' + blob.type.split('/').pop()
-          // 上传相对于整个bucket（图床）路径名
-          var ext = title + '/' + filename
-          // 文章中显示的地址
-          var filePath = ossStaticHost + title + '/' + filename
-          client.put(ext, blob).then((result) => {
-            // console.log(result)
-            // console.log(uuid())
-            // console.log(blob)
-            debugger
-            callback(filePath, '')
-          })
-          // console.log(result);
-          // callback(response.data, '')
-        } catch (e) {
-          console.log(e)
-        }
-      })
-      // var title = this.postForm.title
-      // var formdata = new FormData()
-      // formdata.append('file', blob)
-      // formdata.append('title', title)
-      // upload(formdata).then(response => {
-      //   callback(response.data, '')
-      // })
-    },
     fetchData(id) {
-      fetchArticle(id)
-        .then((response) => {
-          this.postForm = response.data
-
-          // just for test
-          // this.postForm.title += `   Article Id:${this.postForm.id}`
-          // this.postForm.content_short += `   Article Id:${this.postForm.id}`
-
-          // set tagsview title
-          this.setTagsViewTitle()
-
-          // set page title
-          this.setPageTitle()
-        })
-        .catch((err) => {
-          console.log(err)
-        })
+      debugger
+      var response = fetchArticleAsync(id)
+      this.postForm = JSON.parse(response.response).data
+      this.editPrepared += 1
+      this.setTagsViewTitle()
+      this.setPageTitle()
     },
     fetchInfos() {
       fetchInfo()
@@ -317,6 +397,7 @@ export default {
       document.title = `${title} - ${this.postForm.id}`
     },
     submitForm() {
+      this.postForm.content = this.contentEditor.getValue()
       console.log(this.postForm)
       this.$refs.postForm.validate((valid) => {
         if (valid) {
@@ -363,6 +444,10 @@ export default {
       })
     },
     draftForm(auto) {
+      if (this.isEdit && this.editPrepared != 3) {
+        return
+      }
+      this.postForm.content = this.contentEditor.getValue()
       if (
         this.postForm.content.length === 0 ||
         this.postForm.title.length === 0
@@ -404,7 +489,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang='scss' scoped>
 @import '~@/styles/mixin.scss';
 
 .createPost-container {

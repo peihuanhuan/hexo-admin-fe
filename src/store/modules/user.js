@@ -1,4 +1,4 @@
-import { login, logout, getInfo } from '@/api/user'
+import { login, logout } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
@@ -48,7 +48,7 @@ const actions = {
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       console.log('-------------------- 开始 getinfo')
-      const dataStr = '{"roles":["admin"],"introduction":"I am a super administrator","avatar":"https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif","name":"Super Admin"}'
+      const dataStr = '{"roles":["admin"],"introduction":"I am a super administrator","avatar":"https://blogbed.oss-cn-shanghai.aliyuncs.com/static/avatar/dogplane.jpg","name":"Super Admin"}'
       // const dataStr = 'aaa'
       console.log('--------------------- data字符串是: ' + dataStr)
       const data = JSON.parse(dataStr)

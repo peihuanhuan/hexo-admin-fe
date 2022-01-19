@@ -11,7 +11,7 @@ module.exports = {
    * @type {boolean} true | false
    * @description Whether need tagsView
    */
-  tagsView: true,
+  tagsView: false,
 
   /**
    * @type {boolean} true | false
@@ -24,6 +24,12 @@ module.exports = {
    * @description Whether show the logo in sidebar
    */
   sidebarLogo: false,
+
+  /**
+  * @type {boolean} true | false
+  * @description Whether show as darkMode
+  */
+  darkMode: false,
 
   /**
    * @type {string | array} 'production' | ['production', 'development']
