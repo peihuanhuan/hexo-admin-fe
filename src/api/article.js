@@ -44,9 +44,9 @@ export function updateArticlePublish(id) {
   })
 }
 
-export function updateArticleUnPublish(id) {
+export function cancelPublish(id) {
   return request({
-    url: '/article/unpublish/' + id,
+    url: '/article/cancelPublish/' + id,
     method: 'put'
   })
 }
@@ -54,6 +54,14 @@ export function updateArticleUnPublish(id) {
 export function createArticle(data) {
   return request({
     url: '/article',
+    method: 'post',
+    data
+  })
+}
+
+export function addUpdateAndPublish(data) {
+  return request({
+    url: '/article/addUpdateAndPublish',
     method: 'post',
     data
   })

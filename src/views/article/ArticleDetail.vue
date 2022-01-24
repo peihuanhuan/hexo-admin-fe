@@ -16,14 +16,14 @@
           :loading="loading"
           style="margin-left: 10px"
           type="success"
-          @click="submitForm"
+          @click="addUpdateAndPublish"
         >
           发布文章
         </el-button>
         <el-button
           :loading="draftLoading"
           type="warning"
-          @click="draftForm(false)"
+          @click="updateArticle(false)"
         >
           保存草稿 <i class="el-icon-coffee-cup" />
         </el-button>
@@ -31,7 +31,7 @@
           v-if="postForm.id !== undefined"
           :loading="loading"
           type="info"
-          @click="unpublish"
+          @click="cancelPublish"
         >
           取消发布
         </el-button>
@@ -123,10 +123,11 @@ import {
   fetchArticle,
   fetchInfo,
   updateArticle,
-  createArticle,
-  updateArticleUnPublish
+  // createArticle,
+  cancelPublish,
+  addUpdateAndPublish
 } from '@/api/article'
-import { upload, policy } from '@/api/file'
+import { policy } from '@/api/file'
 import uuid from 'uuid'
 import MarkdownEditor from '@/components/MarkdownEditor'
 
@@ -219,7 +220,7 @@ export default {
   },
   methods: {
     autoSaveArticle() {
-      timer.siv.push(setInterval(this.draftForm, 30000))
+      timer.siv.push(setInterval(this.updateArticle, 30000))
     },
     upload_file_with_callback(blob, callback) {
       policy(this.postForm.title).then((response) => {
@@ -316,53 +317,36 @@ export default {
       const title = 'Edit Article'
       document.title = `${title} - ${this.postForm.id}`
     },
-    submitForm() {
+    addUpdateAndPublish() {
       console.log(this.postForm)
       this.$refs.postForm.validate((valid) => {
         if (valid) {
           this.loading = true
           this.postForm.publish = true
-          if (this.postForm.id === undefined) {
-            createArticle(this.postForm)
-              .then((response) => {
-                this.$notify({
-                  title: '发布文章成功',
-                  type: 'success',
-                  duration: 2000
-                })
-                this.postForm.id = response.data
-                console.log(this.postForm.id)
-                this.loading = false
-              })
-              .catch((err) => {
-                console.log(err)
-                this.postForm.publish = false
-                this.loading = false
-              })
-          } else {
-            updateArticle(this.postForm)
-              .then((response) => {
-                this.$notify({
-                  title: '更新文章成功',
-                  type: 'success',
-                  duration: 2000
-                })
-                this.postForm.content = response.data.content
-                this.loading = false
-              })
-              .catch((err) => {
-                console.log(err)
-                this.postForm.publish = false
-                this.loading = false
-              })
-          }
+          addUpdateAndPublish(this.postForm).then((response) => {
+            this.$notify({
+              title: '发布文章成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.postForm.id = response.data.id
+            this.postForm.data = response.data.content
+            console.log(this.postForm.id)
+            this.loading = false
+          })
+            .catch((err) => {
+              console.log(err)
+              this.postForm.publish = false
+              this.loading = false
+            })
+
         } else {
           console.log('error submit!!')
           return false
         }
       })
     },
-    draftForm(auto) {
+    updateArticle(auto) {
       if (
         this.postForm.content.length === 0 ||
         this.postForm.title.length === 0
@@ -394,8 +378,8 @@ export default {
           this.draftLoading = false
         })
     },
-    unpublish() {
-      updateArticleUnPublish(this.postForm.id).then((response) => {
+    cancelPublish() {
+      cancelPublish(this.postForm.id).then((response) => {
         this.$message({ message: '取消发布', type: 'success' })
         this.postForm.publish = false
       })
