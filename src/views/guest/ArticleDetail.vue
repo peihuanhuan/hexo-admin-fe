@@ -6,117 +6,17 @@
       :rules="rules"
       class="form-container"
     >
-      <sticky
-        :z-index="10"
-        :class-name="
-          'sub-navbar ' + (postForm.publish === true ? 'published' : 'draft')
-        "
-      >
-        <el-button
-          :loading="loading"
-          style="margin-left: 10px"
-          type="success"
-          @click="submitForm"
-        >
-          发布文章
-        </el-button>
-        <el-button
-          :loading="draftLoading"
-          type="warning"
-          @click="draftForm(false)"
-        >
-          保存草稿 <i class="el-icon-coffee-cup" />
-        </el-button>
-        <el-button
-          v-if="postForm.id !== undefined"
-          :loading="loading"
-          type="info"
-          @click="unpublish"
-        >
-          取消发布
-        </el-button>
-      </sticky>
-
-      <div class="createPost-main-container">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item style="margin-bottom: 40px" prop="title">
-              <MDinput
-                v-model="postForm.title"
-                :maxlength="100"
-                name="name"
-                required
-              >
-                Title
-              </MDinput>
-            </el-form-item>
-
-            <div class="postInfo-container">
-              <el-row>
-                <el-col :span="10">
-                  <el-form-item
-                    label-width="45px"
-                    label="分类:"
-                    class="postInfo-container-item"
-                  >
-                    <el-select
-                      v-model="postForm.categories"
-                      style="width: 320px"
-                      placeholder="请选择文章分类"
-                      multiple
-                      filterable
-                      allow-create
-                      default-first-option
-                    >
-                      <el-option
-                        v-for="item in categoryOptions"
-                        :key="item"
-                        :value="item"
-                        :label="item"
-                      />
-                    </el-select>
-                  </el-form-item>
-                </el-col>
-
-                <el-col :span="12">
-                  <el-form-item
-                    label-width="80px"
-                    label="标签:"
-                    class="postInfo-container-item"
-                  >
-                    <el-select
-                      v-model="postForm.tags"
-                      style="width: 320px"
-                      placeholder="请选择文章标签"
-                      multiple
-                      filterable
-                      allow-create
-                      default-first-option
-                    >
-                      <el-option
-                        v-for="item in tagOptions"
-                        :key="item"
-                        :value="item"
-                        :label="item"
-                      />
-                    </el-select>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-            </div>
-          </el-col>
-        </el-row>
-
+      <el-row>
         <div class="editor-container">
           <div id="vditor" />
         </div>
-      </div>
+      </el-row>
     </el-form>
   </div>
 </template>
 <script>
-import MDinput from '@/components/MDinput'
-import Sticky from '@/components/Sticky' // 粘性header组件
+// import MDinput from '@/components/MDinput'
+// import Sticky from '@/components/Sticky' // 粘性header组件
 import {
   fetchArticleAsync,
   fetchInfo,
@@ -127,7 +27,7 @@ import {
 
 import Vditor from 'vditor'
 import 'vditor/src/assets/scss/index.scss'
-
+import { formatTime } from '@/utils'
 import { getToken } from '@/utils/auth'
 
 var timer = {
@@ -174,6 +74,7 @@ if (window.innerWidth < 768) {
     'redo',
     '|',
     'edit-mode',
+    'special-function',
     'content-theme',
     'code-theme',
     'export',
@@ -185,7 +86,7 @@ if (window.innerWidth < 768) {
 }
 export default {
   name: 'ArticleDetail',
-  components: { MDinput, Sticky },
+  // components: { MDinput, Sticky },
   props: {
     isEdit: {
       type: Boolean,
@@ -247,7 +148,7 @@ export default {
       },
       debugger: true,
       typewriterMode: true,
-      placeholder: 'Hello, Vditor!',
+      placeholder: '开始记录你的生活吧!',
       preview: {
         markdown: {
           toc: true,
@@ -337,7 +238,8 @@ export default {
           this.contentEditor.setValue(this.postForm.content)
           this.contentEditor.enable()
         } else {
-          this.contentEditor.setValue('# hello world! ')
+          // 新文章预先设定值
+          // this.contentEditor.setValue('# hello world! ')
         }
         // this.contentEditor.setTheme('dark', 'dark',  'native');
         // document.querySelector('body').style.backgroundColor='#2f363d';
@@ -443,6 +345,9 @@ export default {
       })
     },
     draftForm(auto) {
+      // 更新同步标签
+      var syncTimeElm = document.getElementById('syncTime')
+      syncTimeElm.innerHTML = formatTime(new Date())
       if (this.isEdit && this.editPrepared !== 3) {
         return
       }
@@ -470,7 +375,6 @@ export default {
             })
           }
           this.postForm.id = response.data.id
-
           this.draftLoading = false
         })
         .catch((err) => {
@@ -495,7 +399,7 @@ export default {
   position: relative;
 
   .createPost-main-container {
-    padding: 40px 45px 20px 50px;
+    padding: 40px auto;
 
     .postInfo-container {
       position: relative;
@@ -604,5 +508,8 @@ export default {
   /* Internet Explorer 10+ */
   color: #e6e6e6;
 }
-
+.vditor {
+  border: none;
+  border-top: 1px;
+}
 </style>

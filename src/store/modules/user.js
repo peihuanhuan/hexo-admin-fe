@@ -1,7 +1,8 @@
-import { login, logout } from '@/api/user'
+import { login, logout, loginGuest } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
-
+import { getRoles } from '@/api/role'
+// import { darkMode } from '@/settings'
 const state = {
   token: getToken(),
   name: '',
@@ -43,28 +44,47 @@ const actions = {
       })
     })
   },
-
+  loginGuest({ commit }, userInfo) {
+    const { username, password } = userInfo
+    return new Promise((resolve, reject) => {
+      loginGuest({ username: username.trim(), password: password }).then(response => {
+        const { data } = response
+        commit('SET_TOKEN', data.token)
+        setToken(data.token)
+        resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       console.log('-------------------- 开始 getinfo')
-      const dataStr = '{"roles":["admin"],"introduction":"I am a super administrator","avatar":"https://blogbed.oss-cn-shanghai.aliyuncs.com/static/avatar/dogplane.jpg","name":"Super Admin"}'
-      // const dataStr = 'aaa'
-      console.log('--------------------- data字符串是: ' + dataStr)
-      const data = JSON.parse(dataStr)
-      console.log('---------------------解析的data对象是: ' + data)
-      const { roles, name, avatar, introduction } = data
+      debugger
+      getRoles().then(response => {
+        const data = JSON.parse(response.data)
+        const { roles, name, avatar, introduction } = data
+        if (!roles || roles.length <= 0) {
+          reject('getInfo: roles must be a non-null array!')
+        }
+        console.log('---------------- 下面给 storage 赋值')
+        commit('SET_ROLES', roles)
+        commit('SET_NAME', name)
+        commit('SET_AVATAR', avatar)
+        commit('SET_INTRODUCTION', introduction)
+        resolve(data)
+      }).catch(error => {
+        reject(error)
+      })
+      // const dataStr = '{"roles":["admin"],"introduction":"I am a super administrator","avatar":"https://blogbed.oss-cn-shanghai.aliyuncs.com/static/avatar/dogplane.jpg","name":"Super Admin"}'
+      // // const dataStr = 'aaa'
+      // console.log('--------------------- data字符串是: ' + dataStr)
+      // const data = JSON.parse(dataStr)
+      // console.log('---------------------解析的data对象是: ' + data)
+      // const { roles, name, avatar, introduction } = data
 
       // roles must be a non-empty array
-      if (!roles || roles.length <= 0) {
-        reject('getInfo: roles must be a non-null array!')
-      }
-      console.log('---------------- 下面给 storage 赋值')
-      commit('SET_ROLES', roles)
-      commit('SET_NAME', name)
-      commit('SET_AVATAR', avatar)
-      commit('SET_INTRODUCTION', introduction)
-      resolve(data)
 
       // getInfo(state.token).then(response => {
       //   const { data } = response

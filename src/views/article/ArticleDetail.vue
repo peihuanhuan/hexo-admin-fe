@@ -259,7 +259,7 @@ export default {
             // console.log(result)
             // console.log(uuid())
             // console.log(blob)
-            debugger
+
             callback(filePath, '')
           })
           // console.log(result);
