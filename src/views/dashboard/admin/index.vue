@@ -73,12 +73,12 @@
               去编辑
             </el-button>
           </router-link>
-          <el-button v-if="!row.publish" size="mini" type="success" @click="handleModifyStatus(row,true)">
-            发布
-          </el-button>
-          <el-button v-if="row.publish" size="mini" @click="handleModifyStatus(row,false)">
-            取消
-          </el-button>
+          <!--          <el-button v-if="!row.publish" size="mini" type="success" @click="handleModifyStatus(row,true)">-->
+          <!--            发布-->
+          <!--          </el-button>-->
+          <!--          <el-button v-if="row.publish" size="mini" @click="handleModifyStatus(row,false)">-->
+          <!--            取消-->
+          <!--          </el-button>-->
           <el-button size="mini" type="danger" @click="handleDelete(row,$index)">
             删除
           </el-button>

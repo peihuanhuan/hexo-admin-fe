@@ -248,10 +248,10 @@ export default {
             bucket: response.data.bucket,
             region: response.data.region
           })
-          // 文章 名称
-          var title = this.postForm.title
+          // 文章 名称 去除空格
+          var title = this.postForm.title.replaceAll(' ', '')
           // 上传  文件名
-          var filename = uuid() + '.' + blob.type.split('/').pop()
+          var filename = uuid().replace(/-/g, '') + '.' + blob.type.split('/').pop()
           // 上传相对于整个bucket（图床）路径名
           var ext = title + '/' + filename
           // 文章中显示的地址
@@ -340,40 +340,6 @@ export default {
               this.loading = false
             })
 
-          // if (this.postForm.id === undefined) {
-          //   createArticle(this.postForm)
-          //     .then((response) => {
-          //       this.$notify({
-          //         title: '发布文章成功',
-          //         type: 'success',
-          //         duration: 2000
-          //       })
-          //       this.postForm.id = response.data
-          //       console.log(this.postForm.id )
-          //       this.loading = false
-          //     })
-          //     .catch((err) => {
-          //       console.log(err)
-          //       this.postForm.publish = false
-          //       this.loading = false
-          //     })
-          // } else {
-          //   updateArticle(this.postForm)
-          //     .then((response) => {
-          //       this.$notify({
-          //         title: '更新文章成功',
-          //         type: 'success',
-          //         duration: 2000
-          //       })
-          //       this.postForm.content = response.data.content
-          //       this.loading = false
-          //     })
-          //     .catch((err) => {
-          //       console.log(err)
-          //       this.postForm.publish = false
-          //       this.loading = false
-          //     })
-          // }
         } else {
           console.log('error submit!!')
           return false
