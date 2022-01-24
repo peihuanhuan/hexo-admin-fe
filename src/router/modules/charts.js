@@ -9,7 +9,8 @@ const chartsRouter = {
   name: 'Charts',
   meta: {
     title: 'Charts',
-    icon: 'chart'
+    icon: 'chart',
+    roles: ['admin']
   },
   children: [
     {
