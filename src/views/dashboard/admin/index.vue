@@ -100,18 +100,18 @@
 <script>
 import GithubCorner from '@/components/GithubCorner'
 import PanelGroup from './components/PanelGroup'
-import { fetchList, createArticle, updateArticle, deleteArticle, updateArticlePublish, updateArticleUnPublish } from '@/api/article'
+import { fetchList, createArticle, updateArticle, deleteArticle, updateArticlePublish, cancelPublish } from '@/api/article'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
-import LineChart from './components/LineChart'
-import RaddarChart from './components/RaddarChart'
-import PieChart from './components/PieChart'
-import BarChart from './components/BarChart'
-import TransactionTable from './components/TransactionTable'
-import TodoList from './components/TodoList'
-import BoxCard from './components/BoxCard'
+// import LineChart from './components/LineChart'
+// import RaddarChart from './components/RaddarChart'
+// import PieChart from './components/PieChart'
+// import BarChart from './components/BarChart'
+// import TransactionTable from './components/TransactionTable'
+// import TodoList from './components/TodoList'
+// import BoxCard from './components/BoxCard'
 
 export default {
   name: 'DashboardAdmin',
@@ -203,7 +203,7 @@ export default {
           row.publish = publish
         })
       } else {
-        updateArticleUnPublish(row.id).then(response => {
+        cancelPublish(row.id).then(response => {
           this.$message({ message: '取消发布', type: 'success' })
           row.publish = publish
         })
