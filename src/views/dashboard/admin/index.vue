@@ -16,11 +16,6 @@
         Search
       </el-button>
 
-      <router-link :to="'/article/creat'">
-        <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit">
-          Add
-        </el-button>
-      </router-link>
     </div>
 
     <el-table
@@ -68,17 +63,17 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="{row,$index}">
-          <router-link :to="'/article/' + row.id">
+          <router-link :to="'/article2/' + row.id">
             <el-button type="primary" size="mini">
               去编辑
             </el-button>
           </router-link>
-          <!--          <el-button v-if="!row.publish" size="mini" type="success" @click="handleModifyStatus(row,true)">-->
-          <!--            发布-->
-          <!--          </el-button>-->
-          <!--          <el-button v-if="row.publish" size="mini" @click="handleModifyStatus(row,false)">-->
-          <!--            取消-->
-          <!--          </el-button>-->
+          <el-button v-if="!row.publish" size="mini" type="success" @click="handleModifyStatus(row,true)">
+            发布
+          </el-button>
+          <el-button v-if="row.publish" size="mini" @click="handleModifyStatus(row,false)">
+            取消
+          </el-button>
           <el-button size="mini" type="danger" @click="handleDelete(row,$index)">
             删除
           </el-button>

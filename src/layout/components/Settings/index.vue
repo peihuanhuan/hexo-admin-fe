@@ -22,6 +22,10 @@
         <span>Sidebar Logo</span>
         <el-switch v-model="sidebarLogo" class="drawer-switch" />
       </div>
+      <div class="drawer-item">
+        <span>Dark Mode</span>
+        <el-switch v-model="darkMode" class="drawer-switch" />
+      </div>
 
     </div>
   </div>
@@ -65,6 +69,19 @@ export default {
       set(val) {
         this.$store.dispatch('settings/changeSetting', {
           key: 'sidebarLogo',
+          value: val
+        })
+      }
+    },
+    darkMode: {
+      get() {
+        return this.$store.state.settings.darkMode
+      },
+      set(val) {
+        this.contentEditor.setTheme('dark', 'dark', 'native')
+        document.querySelector('body').style.backgroundColor = '#2f363d'
+        this.$store.dispatch('settings/changeSetting', {
+          key: 'darkMode',
           value: val
         })
       }

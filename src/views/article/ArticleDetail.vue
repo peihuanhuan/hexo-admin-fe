@@ -214,7 +214,7 @@ export default {
   },
   destroyed() {
     // 清除定时保存文章任务
-    timer.siv.forEach(function(siv) {
+    timer.siv.forEach(function (siv) {
       clearInterval(siv)
     })
   },
@@ -260,7 +260,7 @@ export default {
             // console.log(result)
             // console.log(uuid())
             // console.log(blob)
-            debugger
+
             callback(filePath, '')
           })
           // console.log(result);
@@ -339,7 +339,6 @@ export default {
               this.postForm.publish = false
               this.loading = false
             })
-
         } else {
           console.log('error submit!!')
           return false
@@ -389,7 +388,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "~@/styles/mixin.scss";
+@import '~@/styles/mixin.scss';
 
 .createPost-container {
   position: relative;
