@@ -21,8 +21,8 @@ import {
   fetchArticleAsync,
   fetchInfo,
   updateArticle,
-  createArticle,
-  updateArticleUnPublish
+  addUpdateAndPublish,
+  cancelPublish
 } from '@/api/article'
 
 import Vditor from 'vditor'
@@ -216,7 +216,7 @@ export default {
         accept: 'image/*,.mp3, .wav, .rar',
         edit: '.svg, .png',
         editUrl:
-          'http://110.42.188.82:8089?embed=1&ui=atlas&spin=1&proto=json&configure=1&lang=zh',
+          process.env.VUE_APP_DRAWIO_PATH + '?embed=1&ui=atlas&spin=1&proto=json&configure=1&lang=zh',
         token: getToken(),
         url: '/api/upload/editor',
         linkToImgUrl: '/api/upload/fetch',
@@ -237,12 +237,19 @@ export default {
           this.editPrepared += 1
           this.contentEditor.setValue(this.postForm.content)
           this.contentEditor.enable()
+          // 绑定标题到编辑器
+          this.contentEditor.setTitle(this.postForm.title)
         } else {
           // 新文章预先设定值
           // this.contentEditor.setValue('# hello world! ')
         }
         // this.contentEditor.setTheme('dark', 'dark',  'native');
         // document.querySelector('body').style.backgroundColor='#2f363d';
+      },
+      changeTileFun: function () {
+        console.log('覆盖了~')
+        window.vue.postForm.title = window.vditor.vditor.contentData.title
+        console.log(window.vditor.vditor.contentData.title)
       }
     })
     window.vditor = this.contentEditor
@@ -297,57 +304,38 @@ export default {
       const title = 'Edit Article'
       document.title = `${title} - ${this.postForm.id}`
     },
-    submitForm() {
-      this.postForm.content = this.contentEditor.getValue()
+    addUpdateAndPublish() {
       console.log(this.postForm)
       this.$refs.postForm.validate((valid) => {
         if (valid) {
           this.loading = true
           this.postForm.publish = true
-          if (this.postForm.id === undefined) {
-            createArticle(this.postForm)
-              .then((response) => {
-                this.$notify({
-                  title: '发布文章成功',
-                  type: 'success',
-                  duration: 2000
-                })
-                this.postForm.id = response.data
-                console.log(this.postForm.id)
-                this.loading = false
+          addUpdateAndPublish(this.postForm)
+            .then((response) => {
+              this.$notify({
+                title: '发布文章成功',
+                type: 'success',
+                duration: 2000
               })
-              .catch((err) => {
-                console.log(err)
-                this.postForm.publish = false
-                this.loading = false
-              })
-          } else {
-            updateArticle(this.postForm)
-              .then((response) => {
-                this.$notify({
-                  title: '更新文章成功',
-                  type: 'success',
-                  duration: 2000
-                })
-                this.postForm.content = response.data.content
-                this.loading = false
-              })
-              .catch((err) => {
-                console.log(err)
-                this.postForm.publish = false
-                this.loading = false
-              })
-          }
+              this.postForm.id = response.data.id
+              this.postForm.data = response.data.content
+              console.log(this.postForm.id)
+              this.loading = false
+            })
+            .catch((err) => {
+              console.log(err)
+              this.postForm.publish = false
+              this.loading = false
+            })
         } else {
           console.log('error submit!!')
           return false
         }
       })
     },
-    draftForm(auto) {
+    updateArticle(auto) {
       // 更新同步标签
-      var syncTimeElm = document.getElementById('syncTime')
-      syncTimeElm.innerHTML = formatTime(new Date())
+      debugger
       if (this.isEdit && this.editPrepared !== 3) {
         return
       }
@@ -356,10 +344,13 @@ export default {
         this.postForm.content.length === 0 ||
         this.postForm.title.length === 0
       ) {
-        this.$message({
-          message: '请填写必要的标题和内容',
-          type: 'warning'
-        })
+        if (auto === false) {
+          this.$message({
+            message: '请填写必要的标题和内容',
+            type: 'warning'
+          })
+        }
+
         return
       }
       this.draftLoading = true
@@ -376,14 +367,22 @@ export default {
           }
           this.postForm.id = response.data.id
           this.draftLoading = false
+          var syncTimeElm = document.getElementById('syncTimeDiv')
+          syncTimeElm.innerHTML =
+            '<span style="cursor: pointer">' +
+            '<span>最后更改于<span id="syncTime">' +
+            formatTime(new Date()) +
+            '</span>' +
+            '</span>' +
+            '</span>'
         })
         .catch((err) => {
           console.log(err)
           this.draftLoading = false
         })
     },
-    unpublish() {
-      updateArticleUnPublish(this.postForm.id).then((response) => {
+    cancelPublish() {
+      cancelPublish(this.postForm.id).then((response) => {
         this.$message({ message: '取消发布', type: 'success' })
         this.postForm.publish = false
       })

@@ -26,7 +26,7 @@ module.exports = {
    */
   publicPath: '/',
   // outputDir: 'dist',//D:\develop\blog\hexo-admin-fe\node_modules\vditor\dist
-  outputDir: 'D:/develop/blog/hexo-admin-fe/node_modules/vditor/dist',//
+  outputDir: 'dist',//
   assetsDir: 'static',
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,

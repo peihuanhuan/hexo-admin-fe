@@ -16,14 +16,14 @@
           :loading="loading"
           style="margin-left: 10px"
           type="success"
-          @click="submitForm"
+          @click="addUpdateAndPublish"
         >
           发布文章
         </el-button>
         <el-button
           :loading="draftLoading"
           type="warning"
-          @click="draftForm(false)"
+          @click="updateArticle(false)"
         >
           保存草稿 <i class="el-icon-coffee-cup" />
         </el-button>
@@ -31,7 +31,7 @@
           v-if="postForm.id !== undefined"
           :loading="loading"
           type="info"
-          @click="unpublish"
+          @click="cancelPublish"
         >
           取消发布
         </el-button>
@@ -40,7 +40,7 @@
       <div class="createPost-main-container">
         <el-row>
           <el-col :span="24">
-            <el-form-item style="margin-bottom: 40px" prop="title">
+            <!-- <el-form-item style="margin-bottom: 40px" prop="title" >
               <MDinput
                 v-model="postForm.title"
                 :maxlength="100"
@@ -49,7 +49,7 @@
               >
                 Title
               </MDinput>
-            </el-form-item>
+            </el-form-item> -->
 
             <div class="postInfo-container">
               <el-row>
@@ -115,19 +115,19 @@
   </div>
 </template>
 <script>
-import MDinput from '@/components/MDinput'
+// import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
 import {
   fetchArticleAsync,
   fetchInfo,
   updateArticle,
-  createArticle,
-  updateArticleUnPublish
+  addUpdateAndPublish,
+  cancelPublish
 } from '@/api/article'
 
 import Vditor from 'vditor'
 import 'vditor/src/assets/scss/index.scss'
-
+import { formatTime } from '@/utils'
 import { getToken } from '@/utils/auth'
 
 var timer = {
@@ -174,6 +174,7 @@ if (window.innerWidth < 768) {
     'redo',
     '|',
     'edit-mode',
+    'special-function',
     'content-theme',
     'code-theme',
     'export',
@@ -185,7 +186,7 @@ if (window.innerWidth < 768) {
 }
 export default {
   name: 'ArticleDetail',
-  components: { MDinput, Sticky },
+  components: { Sticky },
   props: {
     isEdit: {
       type: Boolean,
@@ -247,7 +248,7 @@ export default {
       },
       debugger: true,
       typewriterMode: true,
-      placeholder: 'Hello, Vditor!',
+      placeholder: '开始记录你的生活吧!',
       preview: {
         markdown: {
           toc: true,
@@ -313,9 +314,9 @@ export default {
 
       upload: {
         accept: 'image/*,.mp3, .wav, .rar',
-        edit: '.svg, .png',
+        edit: '.svg', // 可以编辑的图片类型
         editUrl:
-          'http://110.42.188.82:8089?embed=1&ui=atlas&spin=1&proto=json&configure=1&lang=zh',
+          process.env.VUE_APP_DRAWIO_PATH + '?embed=1&ui=atlas&spin=1&proto=json&configure=1&lang=zh',
         token: getToken(),
         url: '/api/upload/editor',
         linkToImgUrl: '/api/upload/fetch',
@@ -336,11 +337,19 @@ export default {
           this.editPrepared += 1
           this.contentEditor.setValue(this.postForm.content)
           this.contentEditor.enable()
+          // 绑定标题到编辑器
+          this.contentEditor.setTitle(this.postForm.title)
         } else {
-          this.contentEditor.setValue('# hello world! ')
+          // 新文章预先设定值
+          // this.contentEditor.setValue('# hello world! ')
         }
         // this.contentEditor.setTheme('dark', 'dark',  'native');
         // document.querySelector('body').style.backgroundColor='#2f363d';
+      },
+      changeTileFun: function () {
+        console.log('覆盖了~')
+        window.vue.postForm.title = window.vditor.vditor.contentData.title
+        console.log(window.vditor.vditor.contentData.title)
       }
     })
     window.vditor = this.contentEditor
@@ -365,7 +374,7 @@ export default {
   },
   methods: {
     autoSaveArticle() {
-      timer.siv.push(setInterval(this.draftForm, 30000))
+      timer.siv.push(setInterval(this.updateArticle, 30000))
     },
     fetchData(id) {
       var response = fetchArticleAsync(id)
@@ -395,54 +404,46 @@ export default {
       const title = 'Edit Article'
       document.title = `${title} - ${this.postForm.id}`
     },
-    submitForm() {
-      this.postForm.content = this.contentEditor.getValue()
+    addUpdateAndPublish() {
       console.log(this.postForm)
       this.$refs.postForm.validate((valid) => {
         if (valid) {
           this.loading = true
           this.postForm.publish = true
-          if (this.postForm.id === undefined) {
-            createArticle(this.postForm)
-              .then((response) => {
-                this.$notify({
-                  title: '发布文章成功',
-                  type: 'success',
-                  duration: 2000
-                })
-                this.postForm.id = response.data
-                console.log(this.postForm.id)
-                this.loading = false
+          addUpdateAndPublish(this.postForm)
+            .then((response) => {
+              this.$notify({
+                title: '发布文章成功',
+                type: 'success',
+                duration: 2000
               })
-              .catch((err) => {
-                console.log(err)
-                this.postForm.publish = false
-                this.loading = false
-              })
-          } else {
-            updateArticle(this.postForm)
-              .then((response) => {
-                this.$notify({
-                  title: '更新文章成功',
-                  type: 'success',
-                  duration: 2000
-                })
-                this.postForm.content = response.data.content
-                this.loading = false
-              })
-              .catch((err) => {
-                console.log(err)
-                this.postForm.publish = false
-                this.loading = false
-              })
-          }
+              this.postForm.id = response.data.id
+              this.postForm.data = response.data.content
+              console.log(this.postForm.id)
+              var syncTimeElm = document.getElementById('syncTimeDiv')
+              syncTimeElm.innerHTML =
+                '<span style="cursor: pointer">' +
+                '<span>最后更改于<span id="syncTime">' +
+                formatTime(new Date()) +
+                '</span>' +
+                '</span>' +
+                '</span>'
+              this.loading = false
+            })
+            .catch((err) => {
+              console.log(err)
+              this.postForm.publish = false
+              this.loading = false
+            })
         } else {
           console.log('error submit!!')
           return false
         }
       })
     },
-    draftForm(auto) {
+    updateArticle(auto) {
+      // 更新同步标签
+      debugger
       if (this.isEdit && this.editPrepared !== 3) {
         return
       }
@@ -451,10 +452,13 @@ export default {
         this.postForm.content.length === 0 ||
         this.postForm.title.length === 0
       ) {
-        this.$message({
-          message: '请填写必要的标题和内容',
-          type: 'warning'
-        })
+        if (auto === false) {
+          this.$message({
+            message: '请填写必要的标题和内容',
+            type: 'warning'
+          })
+        }
+
         return
       }
       this.draftLoading = true
@@ -470,7 +474,14 @@ export default {
             })
           }
           this.postForm.id = response.data.id
-
+          var syncTimeElm = document.getElementById('syncTimeDiv')
+          syncTimeElm.innerHTML =
+            '<span style="cursor: pointer">' +
+            '<span>最后更改于<span id="syncTime">' +
+            formatTime(new Date()) +
+            '</span>' +
+            '</span>' +
+            '</span>'
           this.draftLoading = false
         })
         .catch((err) => {
@@ -478,8 +489,8 @@ export default {
           this.draftLoading = false
         })
     },
-    unpublish() {
-      updateArticleUnPublish(this.postForm.id).then((response) => {
+    cancelPublish() {
+      cancelPublish(this.postForm.id).then((response) => {
         this.$message({ message: '取消发布', type: 'success' })
         this.postForm.publish = false
       })
@@ -495,12 +506,12 @@ export default {
   position: relative;
 
   .createPost-main-container {
-    padding: 40px 45px 20px 50px;
+    padding: 40px auto;
 
     .postInfo-container {
       position: relative;
+      padding: 10px 20px 10px 20px;
       @include clearfix;
-      margin-bottom: 10px;
 
       .postInfo-container-item {
         float: left;
@@ -604,5 +615,8 @@ export default {
   /* Internet Explorer 10+ */
   color: #e6e6e6;
 }
-
+.vditor {
+  border: none;
+  border-top: 1px;
+}
 </style>

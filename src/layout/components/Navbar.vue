@@ -12,17 +12,16 @@
     <div class="lark-editor-header-crumb-status">
       <div class="lark-editor-save-tip">
         <svg-icon icon-class="published" class-name="card-panel-icon" />
-        <span
+      </div>
+      <div id="syncTimeDiv" class="lark-editor-save-tip">
+        <!-- <span
           style="cursor: pointer"
-        ><span>最后更改于<span id="syncTime">??-?? ??:??</span></span></span>
+        ><span>最后更改于<span id="syncTime">??-?? ??:??</span></span></span> -->
       </div>
     </div>
     <div class="lark-editor-header-crumb-status">
-      <div style="line-height: 50px;margin:10px auto;">
-        <el-button type="primary">
-          浏览作者
-        </el-button>
-
+      <div style="line-height: 50px; margin: 10px auto">
+        <el-button type="primary"> 浏览作者 </el-button>
       </div>
     </div>
     <div class="right-menu">
