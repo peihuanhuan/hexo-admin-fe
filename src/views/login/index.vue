@@ -108,8 +108,8 @@ export default {
     return {
       title: process.env.VUE_APP_TITLE,
       loginForm: {
-        username: 'admin',
-        password: '123456'
+        username: '',
+        password: ''
       },
       loginRules: {
         username: [
